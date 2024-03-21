@@ -19,14 +19,15 @@ const main = () => {
 
   app.get('/users/:userId/alerts', async (request, response) => {
     const validation = listUserAlertsRequestSchema.safeParse(request.params);
+    console.log('should be displaying soon...');
     if (!validation.success) {
       return response.status(400).json({error: 'invalid user id'});
     }
 
     const {userId} = validation.data;
-    const alerts = alertQueueManager.getAlertsByUserId(userId);
+    const alerts = alertQueueManager.getAlertsByUserId(userId.toLowerCase());
 
-    return response.status(200).json({user: userId, alerts});
+    return response.status(200).json({user: userId.toLowerCase(), alerts});
   });
 
   app.post('/users/:userId/alerts', async (request, response) => {
@@ -42,7 +43,7 @@ const main = () => {
     const {senderName, tipAmount, userId, message} = validation.data;
     const alertId = uuidV4();
 
-    alertQueueManager.addAlert(userId, {
+    alertQueueManager.addAlert(userId.toLowerCase(), {
       id: alertId,
       message: message ?? '',
       senderName,
@@ -60,7 +61,7 @@ const main = () => {
     }
 
     const {alertId, userId} = validation.data;
-    alertQueueManager.dropAlert(userId, alertId);
+    alertQueueManager.dropAlert(userId.toLowerCase(), alertId);
     return response.status(204).send();
   });
 
